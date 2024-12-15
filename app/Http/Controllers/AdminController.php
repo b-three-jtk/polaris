@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Notification;
 
 class AdminController extends Controller
 {
-
     public function index(Request $request)
     {
         $nama = $request->input('name');
@@ -34,15 +33,15 @@ class AdminController extends Controller
     {
         return view('dashboard.admins.create');
     }
-    
+
     public function store(StoreAdminRequest $request)
     {
         $data = $request->validated();
 
         $generatedPassword = Str::random(10);
-    
+
         DB::beginTransaction();
-    
+
         try {
             $user = User::create([
                 'name' => $data['name'],
@@ -50,7 +49,7 @@ class AdminController extends Controller
                 'password' => bcrypt($generatedPassword),
                 'role' => $data['role'],
             ]);
-    
+
             if ($data['role'] == 2) {
                 Admin::create([
                     'user_id' => $user->user_id,
@@ -61,25 +60,34 @@ class AdminController extends Controller
                     'user_id' => $user->user_id,
                     'nip_reviewer' => $data['nip'],
                     'isActive' => true,
-                    'review_total' => 0
+                    'review_total' => 0,
                 ]);
             }
-    
+
+            try {
+                Notification::route('mail', $data['email'])->notify(new AdminAccountDetail($data['name'], $generatedPassword, $data['role'] == 2 ? 'Admin' : 'Reviewer'));
+                \Log::info('Notification sent successfully', ['email' => $data['email']]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send notification: ' . $e->getMessage());
+            }
+
             DB::commit();
 
-            Notification::route('mail', $data['email'])->notify(new AdminAccountDetail($data['name'], $generatedPassword));
-    
-            Alert::success('Berhasil', 'Admin baru berhasil diperbaharui!');
-    
+            Alert::success('Berhasil', 'Admin baru berhasil ditambahkan!');
+
             return redirect()->route('admin.index')->with('success', 'User created successfully.');
+
         } catch (\Exception $e) {
             DB::rollBack();
 
+            \Log::error('Error occurred: ' . $e->getMessage());
             Alert::error('Error', 'Terjadi kesalahan: ' . $e->getMessage());
-    
-            return redirect()->route('admin.index');
+            return redirect()
+                ->route('admin.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
     public function edit($id)
     {
         $admin = User::with('admin')->findOrFail($id);
@@ -99,17 +107,20 @@ class AdminController extends Controller
             Alert::success('Berhasil', 'Data Admin berhasil diperbaharui!');
 
             return redirect()->route('admin.index', $id);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Jika user tidak ditemukan
             Alert::error('Gagal', 'Data Admin tidak ditemukan.');
 
-            return redirect()->route('admin.index')->withErrors(['error' => 'Data tidak ditemukan.']);
+            return redirect()
+                ->route('admin.index')
+                ->withErrors(['error' => 'Data tidak ditemukan.']);
         } catch (\Exception $e) {
             // Tangkap error lainnya
             Alert::error('Gagal', 'Terjadi kesalahan saat memperbarui data admin.');
 
-            return redirect()->route('admin.index')->withErrors(['error' => 'Terjadi kesalahan saat memperbarui data.']);
+            return redirect()
+                ->route('admin.index')
+                ->withErrors(['error' => 'Terjadi kesalahan saat memperbarui data.']);
         }
     }
 

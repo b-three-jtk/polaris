@@ -161,6 +161,10 @@
 
                 // Move underline
                 setUnderlinePosition(this);
+
+                const submissionCode = this.getAttribute('data-submission-code'); // Pastikan atributnya benar
+                window.location.href = /send-notification/${submissionCode};
+
             });
         });
 
