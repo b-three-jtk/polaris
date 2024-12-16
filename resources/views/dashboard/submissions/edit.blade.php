@@ -3,8 +3,25 @@
 @section('title', 'Edit Data Pengajuan')
 
 @section('content')
+<script src="https://cdn.tiny.cloud/1/47nw0qlhrh8muk22r37wq3jkboeh6f1s37vhnj54knr72ukl/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+    selector: 'textarea#business_process',
+    plugins: 'table lists',
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table'
+});
+tinymce.init({
+    selector: 'textarea#business_rules',
+    plugins: 'table lists',
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table'
+});
+</script>
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Edit Pengajuan</h1>
+        <h1 class="text-2xl font-bold mb-6 pl-72 pt-10">
+            Edit
+            <span class="text-accent-600">Pengajuan Aplikasi</span>
+        </h1>
+
 
         <form id="submissionForm" action="{{ route('submissions.update', ['submission' => $submission]) }}" method="POST" enctype="multipart/form-data"
             class="max-w-4xl mx-auto">

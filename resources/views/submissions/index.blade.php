@@ -417,52 +417,76 @@
             };
 
             const performSearchOrSort = (sortBy = null, sortDirection = 'asc', page = 1) => {
-                const query = $searchInput.val().trim();
-                let platform = [];
+            const query = $searchInput.val().trim();
+            let platform = [];
 
-                // Ambil nilai checkbox platform yang dicentang
-                $('input[name="platform[]"]:checked').each(function() {
-                    platform.push($(this).val());
-                });
-                console.log('Current PerPage:', perPage);
-                console.log('Current platform:', platform);
-                console.log('Current filterExisting:', filterExisting);
+            // Ambil nilai checkbox platform yang dicentang
+            $('input[name="platform[]"]:checked').each(function() {
+                platform.push($(this).val());
+            });
 
-                let data = {
-                    search: query,
-                    platform: platform,
-                    perPage: perPage || $('#perPageDropdown').val(),
-                    sort_direction: sortDirection,
-                    existing_app: filterExisting,
-                    organization: selectedOrganization,
-                    page: page
-                };
-                if (sortBy) {
-                    data.sort_by = sortBy;
-                }
-                let url = window.location.href;
-
-                if (url) {
-                    const urlParams = new URLSearchParams(url.split('?')[1]);
-                    data.page = urlParams.get('page');
-                }
-
-                $.ajax({
-                    url: "{{ route('submissions.search') }}",
-                    type: "GET",
-                    data: data,
-                    success: (data) => {
-                        $searchResults.html(data.html);
-                        window.history.pushState("", "", 
-                            `?search=${encodeURIComponent(query)}&sort_by=${encodeURIComponent(sortBy)}&existing_app=${encodeURIComponent(filterExisting)}&platform=${encodeURIComponent(platform.join(','))}&organization=${encodeURIComponent(selectedOrganization)}&perPage=${encodeURIComponent(perPage)}&page=${encodeURIComponent(page)}`
-                        );
-                        $('.pagination').html(data.pagination);
-                    },
-                    error: (jqXHR, textStatus, errorThrown) => {
-                        console.error("AJAX error: ", textStatus, errorThrown);
-                    }
-                });
+            // Buat objek data dengan filter parameter kosong
+            let data = {
+                perPage: perPage || $('#perPageDropdown').val(),
+                page: page
             };
+
+            // Tambahkan parameter hanya jika memiliki nilai
+            if (query) {
+                data.search = query;
+            }
+
+            if (platform.length > 0) {
+                data.platform = platform;
+            }
+
+            if (sortBy) {
+                data.sort_by = sortBy;
+                data.sort_direction = sortDirection;
+            }
+
+            if (filterExisting !== null) {
+                data.existing_app = filterExisting;
+            }
+
+            if (selectedOrganization) {
+                data.organization = selectedOrganization;
+            }
+
+            let url = window.location.href;
+
+            if (url) {
+                const urlParams = new URLSearchParams(url.split('?')[1]);
+                data.page = urlParams.get('page');
+            }
+
+            $.ajax({
+                url: "{{ route('submissions.search') }}",
+                type: "GET",
+                data: data,
+                success: (data) => {
+                    // Konstruksi query string hanya untuk parameter yang ada nilainya
+                    const queryParams = new URLSearchParams();
+                    if (query) queryParams.append('search', query);
+                    if (sortBy) {
+                        queryParams.append('sort_by', sortBy);
+                        queryParams.append('sort_direction', sortDirection);
+                    }
+                    if (filterExisting !== null) queryParams.append('existing_app', filterExisting);
+                    if (platform.length > 0) queryParams.append('platform', platform.join(','));
+                    if (selectedOrganization) queryParams.append('organization', selectedOrganization);
+                    queryParams.append('perPage', perPage);
+                    queryParams.append('page', page);
+
+                    $searchResults.html(data.html);
+                    window.history.pushState("", "", `?${queryParams.toString()}`);
+                    $('.pagination').html(data.pagination);
+                },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    console.error("AJAX error: ", textStatus, errorThrown);
+                }
+            });
+        };
 
             $(document).on('click', '.pagination a', function (e) {
                 e.preventDefault();

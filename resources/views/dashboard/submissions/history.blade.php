@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Daftar Pengajuan')
+@section('title', 'Daftar Riwayat Review')
 
 @push('styles')
     <style>
@@ -78,16 +78,24 @@
 @endphp
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-6 pl-32 pt-10">
-        <span class="text-black">Data</span>
-        <span class="text-accent-600">Pengajuan</span>
+    <div class="pl-32">
+        <a href="{{ route('dashboard.submissions.index') }}">
+            <span class="text-2xl material-symbols-outlined">
+                arrow_back
+                </span>
+        </a>
+    </div>
+    <h1 class="text-2xl font-bold mb-8 pl-32 pt-10">
+        <span class="text-black">Riwayat</span>
+        <span class="text-accent-600">Review Pengajuan</span>
     </h1>
-    @if (auth()->user()->role == 3)
-    <a href="{{ route('review.index') }}" class="mr-auto float-left bg-white ml-32 py-2 mb-3 px-4 rounded-xl flex items-center border gap-5">
+    @if (auth()->user()->role == 4)
+    <a href="{{ route('admin.create') }}" class="mr-auto float-left bg-white ml-32 py-2 px-4 rounded-xl flex items-center border gap-5">
         <span class="material-symbols-outlined text-lg">
             history
             </span>
             History
+            <span class="bg-primary-700 rounded-full py-0.5 px-2 text-white text-xs">0</span>
     </a>        
     @elseif (auth()->user()->role == 1)
     <a href="{{ route('submissions.create') }}" class="mr-auto float-left mb-3 bg-secondary-800 text-white ml-32 py-2 px-4 rounded-xl flex items-center border gap-2">
@@ -114,11 +122,10 @@
                     @endif
                     <th scope="col" class="px-6 py-4 font-semibold">Tanggal Pengajuan</th>
                     <th scope="col" class="px-6 py-4 text-center font-semibold">Status</th>
-                    <th scope="col" class="px-6 py-4 text-center font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody class="text-md">
-                @forelse($data_pengajuans as $pengajuan)
+                @forelse($submissions as $pengajuan)
                     <tr class="bg-white border-b hover:bg-gray-50">
                         <td class="px-6 py-4">{{ $pengajuan->submission_title }}</td>
                         @if (auth()->user()->role != 1)
@@ -161,55 +168,10 @@
                                     Diarsipkan</span>
                             @endif
                         </td>
-                        @if (auth()->user()->role == 3)
-                            <td class="px-6 py-4">
-                                <a href="{{ route('review.edit', ['review' => $pengajuan->submission_code]) }}"
-                                    class="flex items-center text-black-600 mx-auto">
-                                    <span
-                                        class="inline-flex items-center px-4 py-1 text-sm font-semibold text-white bg-blue-500 rounded-full">
-                                        <span class="material-symbols-outlined">
-                                            rate_review
-                                        </span>
-                                        <span class="ml-1">Review</span>
-                                    </span>
-                                </a>
-                            </td>
-                        @else
-                            <td class="px-6 py-4 flex items-center justify-center gap-2">
-                                <a href="{{ route('submissions.show', ['submission_code' => $pengajuan->submission_code]) }}"
-                                    class="flex items-center text-nowrap text-black-600 text-secondary-800">
-                                    <span class="material-symbols-outlined mr-1 text-lg">visibility</span>
-                                </a>
-                                @if ($pengajuan->status != 'terverifikasi' && auth()->user()->role == 1)
-                                    <a href="{{ route('submissions.edit', ['submission_code' => $pengajuan->submission_code]) }}"
-                                        class="flex items-center text-nowrap text-black-600 text-accent-light-500">
-                                        <span class="material-symbols-outlined mr-1 text-lg">edit</span>
-                                    </a>
-                                    <form method="POST"
-                                        action="{{ route('submission.destroy', ['submission_code' => $pengajuan->submission_code]) }}"
-                                        class="flex items-center text-nowrap text-black-600 text-red-500">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">
-                                            <span class="material-symbols-outlined mr-1 text-lg">delete</span>
-                                        </button>
-                                    </form>
-                                @endif
-                                @if (auth()->user()->role == 2)
-                                    <form
-                                        action="{{ route('submission.archive', ['submission_code' => $pengajuan->submission_code]) }}"
-                                        method="POST" class="flex items-center text-nowrap text-black-600 text-gray-400">
-                                        @csrf
-                                        <button type="submit"><span class="material-symbols-outlined mr-1 text-lg"
-                                                title="Arsipkan">archive</span></button>
-                                    </form>
-                                @endif
-                            </td>
-                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center">Tidak ada pengajuan yang ditemukan.</td>
+                        <td colspan="5" class="px-6 py-4 text-center">Tidak ada pengajuan yang sudah Anda review.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -230,28 +192,7 @@
     <script>
         $(document).ready(function() {
             $('#mauexport').DataTable({
-                dom: 'Bfrtip',
-                buttons: [{
-                        extend: 'copy',
-                        text: '<span class="material-symbols-outlined">content_copy</span> Salin',
-                        className: 'btn-copy'
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<span class="material-symbols-outlined">description</span> Excel',
-                        className: 'btn-excel'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<span class="material-symbols-outlined">picture_as_pdf</span> PDF',
-                        className: 'btn-pdf'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<span class="material-symbols-outlined">print</span> Cetak',
-                        className: 'btn-print'
-                    }
-                ]
+                
             });
         });
     </script>

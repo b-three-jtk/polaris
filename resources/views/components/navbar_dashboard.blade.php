@@ -1,7 +1,14 @@
 <nav class="sticky border-gray-200 py-3 dark:bg-gray-900 px-10">
     <div class="flex items-center justify-between w-full">
         <!-- Navbar Links -->
-        <div class="flex items-center space-x-8">
+        <div class="flex items-center justify-center space-x-8">
+            <div class="pl-2">
+                <a href="{{ route('home') }}">
+                    <span class="text-2xl material-symbols-outlined">
+                        arrow_back
+                        </span>
+                </a>
+            </div>
             <!-- Logo -->
             <a href="{{ route('home') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img class="max-h-12" src="{{ asset('images/Logo.png') }}" alt="Logo">
@@ -46,7 +53,7 @@
                     </svg>
                     <!-- Jumlah Notifikasi -->
                     @php
-                         $unreadCount = Auth::user()->notification()->where('isRead', false)->count();
+                        $unreadCount = Auth::user()->notification()->where('isRead', false)->count();
                     @endphp
                     @if($unreadCount > 0)
                     <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
@@ -91,9 +98,6 @@
                     <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                         <li>
                             <a href="{{ route('user.show', ['user' => auth()->user()]) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Profile</a>
-                        </li>
-                        <li>
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Settings</a>
                         </li>
                     </ul>
                     <div class="py-1">

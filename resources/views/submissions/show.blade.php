@@ -5,14 +5,14 @@
 @section('content')
 <div class="px-60 my-10 p-6 font-manrope">
     <!-- Judul -->
-    <h1 class="text-3xl font-semibold mb-6 text-center text-gray-800">
+    <h1 class="text-3xl font-semibold mb-10 text-center text-gray-800">
         {{ $submission->submission_title }}
     </h1>
 
     <!-- Nama Organisasi -->
-    <div class="flex justify-left items-center">
+    <div class="flex justify-left items-center mb-3">
         <img src="{{ asset('images/organization.png') }}" alt="Logo Organisasi" class="h-8 w-8">
-        <h2 class="text-xl font-bold text-gray-700 mr-4 px-6">{{ $submission->submitter->organization->organization_name }}</h2>
+        <h2 class="text-xl font-bold text-gray-700 px-6">{{ $submission->submitter->organization->organization_name }}</h2>
     </div>
 
     <!-- Tabs Navigation -->
@@ -49,10 +49,10 @@
             <div class="bg-white p-6 shadow-xl rounded-lg h-[300px] overflow-y-auto">
                 <h2 class="text-lg font-bold mb-4">Kebutuhan Aplikasi</h2>
                 <h3 class="text-md font-semibold mb-2">Proses Bisnis:</h3>
-                <p class="text-md text-gray-600 mb-6">{{ $submission->business_process }}</p>
+                <p class="text-md text-gray-600 mb-6">{!! $submission->business_process !!}</p>
 
-                <h3 class="text-md font-semibold mt-4 mb-2">Aturan Bisnis:</h3>
-                <p class="text-md text-gray-600 mb-6">{{ $submission->business_rules }}</p>
+                <h3 class="text-md font-semibold mt-4">Aturan Bisnis:</h3>
+                <p class="text-md text-gray-600 mb-6">{!! $submission->business_rules !!}</p>
             </div>
         </div>
 
@@ -78,9 +78,23 @@
             <div class="bg-white p-6 shadow-xl rounded-lg h-[300px] overflow-y-auto">
                 <h2 class="text-lg font-bold mb-4">Referensi</h2>
                 @foreach ($submission->reference as $ref)
-                    <p class="text-md text-gray-600 mb-6">{{ $ref->description }}</p>
-                    <img src="{{ $ref->path }}" alt="Referensi Image" class="rounded-md shadow-lg my-4"> 
-                @endforeach
+                <p class="text-lg text-gray-600 mb-2">{{ $ref->description }}</p>
+                @if ($ref->type == 'file')
+                    @php
+                        $filePath = storage_path('app/public/' . $ref->path);
+                        $fileExtension = pathinfo($ref->path, PATHINFO_EXTENSION);
+                    @endphp
+                    @if (in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif']))
+                        <img src="{{ asset('storage/' . $ref->path) }}" alt="Referensi Image" class="mb-2"
+                            style="width: 100%; max-width: 300px;">
+                    @elseif (strtolower($fileExtension) == 'pdf')
+                        <embed src="{{ asset('storage/' . $ref->path) }}" type="application/pdf" class="mb-2"
+                            width="100%" height="600px">
+                    @endif
+                @else
+                    <a href="{{ $ref->path }}" class="text-lg text-gray-600 mb-2">{{ $ref->path }}</a>
+                @endif
+            @endforeach
             </div>
         </div>
 

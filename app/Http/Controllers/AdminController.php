@@ -73,15 +73,12 @@ class AdminController extends Controller
 
             DB::commit();
 
-            Alert::success('Berhasil', 'Admin baru berhasil ditambahkan!');
-
-            return redirect()->route('admin.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.index')->with('success', 'Admin baru berhasil ditambahkan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             \Log::error('Error occurred: ' . $e->getMessage());
-            Alert::error('Error', 'Terjadi kesalahan: ' . $e->getMessage());
             return redirect()
                 ->route('admin.index')
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -104,23 +101,16 @@ class AdminController extends Controller
 
             $user->update($data);
 
-            Alert::success('Berhasil', 'Data Admin berhasil diperbaharui!');
-
-            return redirect()->route('admin.index', $id);
+            return redirect()->route('admin.index', $id)->with('success', 'Data Admin berhasil diperbaharui!');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Jika user tidak ditemukan
-            Alert::error('Gagal', 'Data Admin tidak ditemukan.');
-
             return redirect()
                 ->route('admin.index')
-                ->withErrors(['error' => 'Data tidak ditemukan.']);
+                ->with('error', 'Data tidak ditemukan.');
         } catch (\Exception $e) {
             // Tangkap error lainnya
-            Alert::error('Gagal', 'Terjadi kesalahan saat memperbarui data admin.');
-
             return redirect()
                 ->route('admin.index')
-                ->withErrors(['error' => 'Terjadi kesalahan saat memperbarui data.']);
+                ->with('error', 'Terjadi kesalahan saat memperbarui data.');
         }
     }
 

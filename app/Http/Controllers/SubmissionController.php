@@ -73,9 +73,9 @@ class SubmissionController extends Controller
         $sort_by = $request->input('sort_by', 'submission_title');
         $sort_direction = $request->input('sort_direction', 'desc');
         $platform_filter = $request->input('platform', []);
-        $existing_app = $request->boolean('existing_app');
+        $existing_app = $request->boolean('existing_app', true);
         $organization = $request->input('organization');
-        $perPage = $request->input('perPage');
+        $perPage = $request->input('perPage', 5);
 
         $organizations = DB::table('organizations')
         ->select('organization_code', 'organization_name')
@@ -147,11 +147,12 @@ class SubmissionController extends Controller
                 $path = null;
     
                 // Pastikan file tersedia jika tipe adalah 'file'
-                if ($ref['tipe'] === 'file' && isset($ref['file_path'])) {
-                    $file = $ref['file_path']; // Ambil dari ref array
+                if (isset($ref['tipe']) && $ref['tipe'] === 'file') {
+                    $file = $request->file('referensi.' . $index . '.file_path'); // Mengakses file berdasarkan array index
+
                     if ($file instanceof \Illuminate\Http\UploadedFile) {
                         $fileName = time() . '_' . $file->getClientOriginalName();
-                        $path = $file->storeAs('uploads', $fileName);
+                        $path = $file->storeAs('uploads', $fileName, 'public');
                     }
                 } elseif ($ref['tipe'] === 'link') {
                     $path = $ref['link_path'] ?? null;
@@ -167,21 +168,16 @@ class SubmissionController extends Controller
                 }
             }
     
-            Alert::success('Berhasil', 'Anda berhasil mengirim pengajuan!');
-    
-            return redirect()->route('dashboard.submissions.index');
+            return redirect()->route('dashboard.submissions.index')->with('success', 'Anda berhasil mengirim pengajuan!');
         } catch (ValidationException $e) {
             // Menangani kesalahan validasi
-            Alert::error('Gagal', 'Terjadi kesalahan dalam validasi data. Silakan periksa kembali input Anda.');
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan dalam validasi data. Silakan periksa kembali input Anda.');
         } catch (ModelNotFoundException $e) {
             // Menangani kesalahan model tidak ditemukan (misalnya submitter)
-            Alert::error('Gagal', 'Data yang Anda cari tidak ditemukan.');
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('error', 'Data yang Anda cari tidak ditemukan.');
         } catch (Exception $e) {
             // Menangani kesalahan lainnya
-            Alert::error('Gagal', 'Terjadi kesalahan, coba lagi nanti.');
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan, coba lagi nanti.');
         }
     }    
     /**
@@ -232,10 +228,7 @@ class SubmissionController extends Controller
             $submission->references()->createMany($references->toArray()); // Tambahkan referensi baru
         }
     
-        // Tampilkan notifikasi
-        Alert::success('Berhasil', 'Pengajuan berhasil diperbaharui!');
-    
-        return redirect()->route('dashboard.submissions.index');
+        return redirect()->route('dashboard.submissions.index')->with('success', 'Pengajuan berhasil diperbaharui!');
     }
     
     
@@ -248,9 +241,7 @@ class SubmissionController extends Controller
 
         $submission->delete();
 
-        Alert::success('Berhasil', 'Pengajuan berhasil dihapus!');
-        
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Pengajuan berhasil dihapus!');
     }
 
     public function showAllSubmissions(Request $request)
@@ -265,23 +256,22 @@ class SubmissionController extends Controller
                     return $query->where('submitter_id', $user->submitter->submitter_id);
                 })
                 ->when($submission_title, function ($query) use ($submission_title) {
-                    return $query->where('submission_title', 'LIKE', '%' . $submission_title . '%');
-                })
-                ->paginate(10);
+                    return $query->where('submission_code', 'PGN-675EEF9270A4A');
+                })->get();
         } else if ($user->role == 2) {
             $data_pengajuans = Submission::with('submitter')
                 ->where('status', '!=', 'diarsipkan')
                 ->when($submission_title, function ($query) use ($submission_title) {
                     return $query->where('submission_title', 'LIKE', '%' . $submission_title . '%');
                 })
-                ->paginate(10);
+                ->get();
         } else {
             $data_pengajuans = DB::table('submissions_need_review')
-                ->where('nip_reviewer', $user->reviewer->nip_reviewer)
+                ->where('nip_reviewer', trim($user->reviewer->nip_reviewer))
                 ->when($submission_title, function ($query) use ($submission_title) {
                     return $query->where('submission_title', 'LIKE', '%' . $submission_title . '%');
                 })
-                ->paginate(10);
+                ->get();
         }
 
         $title = 'Hapus Pengajuan!';
@@ -336,6 +326,7 @@ class SubmissionController extends Controller
             'notifiable_id' => $submission->submission_code,
             'notifiable_type' => Submission::class,
         ]);
+        
 
         return redirect()->route('dashboard.submissions.index')->with('success', 'Status submission berhasil diupdate.');
     }
@@ -352,9 +343,7 @@ class SubmissionController extends Controller
 
         $submission->update(['status' => 'diarsipkan']);
 
-        Alert::success('Berhasil', 'Pengajuan berhasil diarsipkan!');
-        
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Pengajuan berhasil diarsipkan!');
     }
 
 }

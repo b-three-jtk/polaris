@@ -76,9 +76,7 @@ class UserController extends Controller
             ]);
         }
         
-        Alert::success('Berhasil', 'Anda berhasil memperbarui profil!');
-    
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Anda berhasil memperbarui profil!');
     }
 
     /**

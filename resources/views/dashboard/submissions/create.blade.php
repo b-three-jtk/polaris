@@ -3,8 +3,25 @@
 @section('title', 'Tambah Data Pengajuan')
 
 @section('content')
+    <script src="https://cdn.tiny.cloud/1/47nw0qlhrh8muk22r37wq3jkboeh6f1s37vhnj54knr72ukl/tinymce/7/tinymce.min.js"
+        referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea#business_process',
+            plugins: 'table lists',
+            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table'
+        });
+        tinymce.init({
+            selector: 'textarea#business_rules',
+            plugins: 'table lists',
+            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table'
+        });
+    </script>
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Form Pengajuan</h1>
+        <h1 class="text-2xl font-bold mb-6 pl-72 pt-10">
+            Form
+            <span class="text-accent-600">Pengajuan Aplikasi</span>
+        </h1>
 
         <form id="submissionForm" action="{{ route('submissions.store') }}" method="POST" enctype="multipart/form-data"
             class="max-w-4xl mx-auto">
@@ -186,6 +203,7 @@
                             <p class="text-gray-500">Drag & drop file atau klik untuk memilih file</p>
                             <p class="file-name text-sm text-gray-400 mt-2"></p>
                         </div>
+                        <small class="text-muted">Format: pdf, jpg, jpeg, png. Maksimal ukuran: 2MB.</small>
                         <div class="mt-4">
                             <label class="block mb-2">Keterangan</label>
                             <input type="text" name="referensi[{index}][keterangan]"
@@ -229,6 +247,8 @@
                     class="bg-accent-light-500 text-white px-4 py-2 rounded">Next</button>
                 <button type="submit" id="submitBtn"
                     class="bg-accent-light-500 text-white px-4 py-2 rounded hidden">Submit</button>
+                <button type="submit" id="submitterBtn"
+                    class="bg-accent-light-500 text-white px-4 py-2 rounded hidden"></button>
             </div>
         </form>
 
@@ -269,7 +289,7 @@
             // Required fields configuration
             const requiredFieldsByStep = {
                 1: ['submission_title', 'problem_description', 'application_purpose'],
-                2: ['business_process', 'business_process'],
+                2: [],
                 3: ['stakeholders', 'platform'],
                 4: [] // Optional step
             };
@@ -470,6 +490,25 @@
                     successPopup.classList.add('hidden');
                 }, 3000);
             }
+
+            document.getElementById('submitBtn').addEventListener('click', function(event) {
+                event.preventDefault(); // Mencegah form langsung disubmit
+
+                // Menampilkan konfirmasi SweetAlert2
+                Swal.fire({
+                    title: 'Yakin Mau Submit?',
+                    text: "Pastikan data yang dimasukkan sudah benar.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Submit!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika pengguna klik 'Ya, Submit!', form disubmit
+                        submitterBtn.click();
+                    }
+                });
+            });
         });
     </script>
 

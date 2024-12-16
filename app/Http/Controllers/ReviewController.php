@@ -21,9 +21,9 @@ class ReviewController extends Controller
      */
     public function edit($submission_code)
     {
-        $pengajuan = Submission::with('reference')->where('submission_code', $submission_code)->first();
+        $submission = Submission::with('reference')->where('submission_code', $submission_code)->first();
 
-        return view('dashboard.submissions.review', compact('pengajuan')); // Sesuaikan nama view
+        return view('dashboard.submissions.review', compact('submission')); // Sesuaikan nama view
     }
 
     /**
@@ -41,14 +41,9 @@ class ReviewController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return redirect()->back()->with('error', 'Gagal melakukan review');
         }
 
-        DB::beginTransaction(); // Memulai transaksi
         try {
             // Mendapatkan data submission berdasarkan ID
             $submission = Submission::findOrFail($id);
@@ -56,32 +51,45 @@ class ReviewController extends Controller
             // Mengisi data submission dengan input dari request
             $submission->fill($request->all());
             $submission->review_description = $request->review_description;
-            $submission->status = $request->status;
+            if ($request->status == 1) {
+                $submission->status = 'terverifikasi';
+            } else {
+                $submission->status = 'ditolak';
+            }
             $submission->review_date = now(); // Menyimpan tanggal review
 
             // Menyimpan perubahan ke database
             $submission->save();
 
             // Mengirim notifikasi
-            // $response = Http::timeout(120)->get(route('send-notification', ['submission' => $submission->submission_code]));
             $response = app(EmailNotificationsController::class)->sendNotification($submission->submission_code);
 
-            // Periksa status response
             if ($response->getData()->status == 'success') {
-                Alert::success('Berhasil', 'Anda berhasil mereview pengajuan!');
+                return redirect()->route('dashboard.submissions.index')->with('success', 'Anda berhasil mereview pengajuan!');
             } else {
-                Alert::error('Gagal', 'Terjadi kesalahan saat mengirim email notifikasi: ' . $response->getData()->message);
+                return redirect()->route('dashboard.submissions.index')->with('error', 'Terjadi kesalahan saat mengirim email notifikasi: ' . $response->getData()->message);
             }
 
-            DB::commit(); // Commit transaksi jika semua berhasil
-            return redirect()->route('dashboard.submissions.index');
-
         } catch (\Exception $e) {
-            DB::rollback(); // Rollback transaksi jika terjadi error
-            Alert::error('Gagal', 'Terjadi kesalahan');
-            return redirect()->route('dashboard.submissions.index');
+            // Menangani exception jika terjadi kesalahan
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function showHistory() {
+        $user = auth()->user();
+
+        $submissions = DB::table('submissions')
+            ->where('nip_reviewer', trim($user->reviewer->nip_reviewer))
+            ->where('status', '!=', 'belum_direview')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('dashboard.submissions.history', compact('submissions'));
+    }
+
+
 
     /**
      * Remove the specified resource from storage.

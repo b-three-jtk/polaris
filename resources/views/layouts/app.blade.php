@@ -19,6 +19,26 @@
 </head>
 
 <body>
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}',
+            });
+        </script>
+    @endif
+
     <header>
         @include('components.navbar')
     </header>
@@ -28,7 +48,7 @@
     </div>
 
     @include('components.footer')
-    @include('sweetalert::alert')
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function navToogle() {
             var x = document.getElementById("nav-items");

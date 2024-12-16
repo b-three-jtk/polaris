@@ -7,9 +7,30 @@
     <title>@yield('title')</title>
     <link rel="icon" href="{{ asset('images/Logo-mini.png') }}" type="image/x-icon"/>
     @vite('resources/css/app.css')
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @stack('styles')
 </head>
 <body>
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}',
+            });
+        </script>
+    @endif
     <header>
         @include('components.navbar_dashboard')
     </header>
@@ -23,7 +44,6 @@
         @vite('resources/js/app.js')
     {{-- @endif --}}
     @stack('scripts')
-    @include('sweetalert::alert')
 
     <script>
         function navToogle() {

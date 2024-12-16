@@ -12,11 +12,31 @@
     @if (Route::currentRouteName() != 'dashboard.submissions.print')
         @vite('resources/js/app.js')
     @endif
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @vite('resources/css/app.css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @include('sweetalert::alert')
 </head>
 <body>
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}',
+            });
+        </script>
+    @endif
     <div class="container">
         @yield('content')
     </div>

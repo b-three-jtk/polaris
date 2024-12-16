@@ -59,15 +59,11 @@ class HomeController extends Controller
             
             Mail::to('contactsims11@gmail.com')->send(new FeedbackMail($feedback));
     
-            Alert::success('Berhasil', 'Terima kasih atas feedback Anda, pesan Anda sudah terkirim.');
-    
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Terima kasih atas feedback Anda, pesan Anda sudah terkirim.');
         } catch (\Exception $e) {
             \Log::error('Error saat mengirim feedback: ' . $e->getMessage());
     
-            Alert::error('Gagal', 'Terjadi kesalahan saat mengirim pesan Anda. Silakan coba lagi.');
-    
-            return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan saat mengirim pesan Anda.']);
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat mengirim pesan Anda.');
         }
     }
     
@@ -81,15 +77,12 @@ class HomeController extends Controller
                 ->where('submissions.submitter_id', $user->submitter->submitter_id)
                 ->take(3)
                 ->get();
-        } else if ($user->role == 3) {
-            $reviewer = $user->reviewer;
-
+        } else if ($user->role == 4) {
             $pengajuan = DB::table('submissions')
-                ->where('status', 'belum_direview')
-                ->where('nip_reviewer', $reviewer->nip_reviewer)
-                ->orderBy('created_at', 'desc')
-                ->take(3)
-                ->get();
+            ->where('status', 'belum_direview')
+            ->where('nip_reviewer', $user->reviewer->nip_reviewer)
+            ->take(3) // Membatasi hasil hanya 3
+            ->get();
         } else {
             $pengajuan = DB::table('submissions')
                 ->where('status', '!=', 'diarsipkan')

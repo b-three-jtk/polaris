@@ -39,6 +39,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123!')
         ]);
 
+        $user->markEmailAsVerified();
+
         $admin = User::create([
             'name' => 'Mamang Admin',
             'email' => 'mamang@polaris.com',
@@ -48,6 +50,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123!')
         ]);
 
+        $admin->markEmailAsVerified();
+
         $reviewer = User::create([
             'name' => 'Asep bin Budi',
             'email' => 'asepbinbudi@polaris.com',
@@ -56,6 +60,8 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('password123!')
         ]);
+
+        $reviewer->markEmailAsVerified();
 
         Submitter::create([
             'user_id' => $user->user_id,
@@ -78,7 +84,7 @@ class DatabaseSeeder extends Seeder
         Organization::factory(10)->create();
         // User::factory(10)->create();
         // Submitter::factory(10)->create();
-        Submission::factory(30)->create();
+        // Submission::factory(30)->create();
         // Reference::factory(5)->create();
         // // Review::factory(5)->create();
         // Reviewer::factory(10)->create();

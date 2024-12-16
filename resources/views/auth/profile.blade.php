@@ -23,7 +23,6 @@
                     @if (auth()->user()->role == 1)
                     <a href="#" data-tab="organisasi" class="tab-link block text-xl font-semibold text-gray-800 dark:text-white py-5 px-4 shadow-md rounded-full">Organisasi</a>        
                     @endif
-                    <a href="#" data-tab="settings" class="tab-link block text-xl font-semibold text-gray-800 dark:text-white py-5 px-4 shadow-md rounded-full">Settings</a>
                 </div>
             </div>
 

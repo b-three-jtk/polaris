@@ -15,7 +15,6 @@ use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
-
 class AuthController extends Controller
 {
     public function showRegistrationForm()
@@ -53,8 +52,7 @@ class AuthController extends Controller
         ]);
     
         if ($validator->fails()) {
-            Alert::error('Gagal', 'Validasi data gagal. Periksa input Anda.');
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->with('error', 'Validasi data gagal. Periksa input Anda.')->withInput();
         }
     
         DB::beginTransaction();
@@ -85,7 +83,6 @@ class AuthController extends Controller
     
             event(new Registered($user));
     
-            Alert::success('Berhasil', 'Registrasi berhasil. Silakan verifikasi email Anda.');
             return redirect()->route('verification.notice');
         } catch (\Exception $e) {
             // Rollback transaksi jika terjadi error
@@ -93,8 +90,7 @@ class AuthController extends Controller
     
             \Log::error('Error saat registrasi: ' . $e->getMessage());
     
-            Alert::error('Gagal', 'Terjadi kesalahan saat proses registrasi. Silakan coba lagi.');
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan saat proses registrasi.'])->withInput();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat proses registrasi. Silakan coba lagi.')->withInput();
         }
     }    
 
@@ -127,7 +123,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:8',
+            'password' => 'required',
         ]);
 
         $remember = $request->has('remember');
@@ -138,8 +134,7 @@ class AuthController extends Controller
             // Cek jika email pengguna sudah terverifikasi
             if (!$user->hasVerifiedEmail()) {
                 Auth::logout();  // Log out jika email belum terverifikasi
-                Alert::error('Error', 'Email Anda belum terverifikasi!');
-                return back()->onlyInput('email');
+                return back()->onlyInput('email')->with('error', 'Email Anda belum terverifikasi!');
             }
 
             return redirect()->intended('dashboard')->with('success', 'Login successful!');

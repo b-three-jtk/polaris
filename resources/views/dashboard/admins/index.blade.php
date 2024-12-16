@@ -85,7 +85,7 @@
         color: #fff!important;
     }
 
-    .dataTables_paginate {
+    .dataTables_paginate .paginate_button {
         color: #fff!important;
     }
 

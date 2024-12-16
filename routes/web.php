@@ -54,6 +54,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/pengajuan/store', [SubmissionController::class, 'store'])->name('submissions.store');
         Route::get('/pengajuan/print', [SubmissionController::class, 'print'])->name('dashboard.submissions.print');  
         Route::post('/submission/{submission_code}/archive', [SubmissionController::class, 'archiveSubmission'])->name('submission.archive');
+        Route::get('/review', [ReviewController::class, 'showHistory'])->name('review.index');
     });
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
@@ -87,7 +88,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 // Open Routes
 Route::get('/admins', [AdminController::class, 'index'])->name('admins.index');
-Route::get('/send-notification', [emailNotificationsController::class, 'sendNotification']);
+Route::get('/send-notification/{submission}', [EmailNotificationsController::class, 'sendNotification'])->name('send-notification');
 
 });
 

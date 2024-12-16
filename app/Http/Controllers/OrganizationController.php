@@ -44,16 +44,12 @@ class OrganizationController extends Controller
     
             Organization::create($data);
     
-            Alert::success('Berhasil', 'Organisasi berhasil disimpan!');
-    
-            return redirect()->route('organizations.index');
+            return redirect()->route('organizations.index')->with('success', 'Organisasi berhasil disimpan!');
     
         } catch (\Exception $e) {
             \Log::error('Error creating organization: ' . $e->getMessage());
     
-            Alert::error('Gagal', 'Terjadi kesalahan saat menyimpan data organisasi.');
-    
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data organisasi.');
         }
     }    
 
@@ -94,16 +90,12 @@ class OrganizationController extends Controller
     
             $organization->save();
     
-            Alert::success('Berhasil', 'Profil organisasi berhasil diperbaharui!');
-            
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Profil organisasi berhasil diperbaharui!');
     
         } catch (\Exception $e) {
             \Log::error('Error updating organization: ' . $e->getMessage());
     
-            Alert::error('Gagal', 'Terjadi kesalahan saat memperbarui profil organisasi.');
-    
-            return redirect()->back();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui profil organisasi.');
         }
     }
     
