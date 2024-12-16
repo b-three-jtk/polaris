@@ -131,7 +131,6 @@ class SubmissionController extends Controller
         try {
             // Validasi data dari request
             $data = $request->validated();
-
     
             // Tambahkan data tambahan
             $data['submitter_id'] = Auth::user()->submitter->submitter_id;
@@ -209,8 +208,8 @@ class SubmissionController extends Controller
     public function update(UpdateSubmissionRequest $request, Submission $submission)
     {
         // Perbarui data utama pengajuan
-        $submission->update(array_merge(
-            $request->validated(),
+        $submission->update(
+            array_merge($request->validated(),
             ['status' => 'belum_direview'] // Set status menjadi 'belum_direview'
         ));
     

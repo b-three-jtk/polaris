@@ -7,9 +7,9 @@
         <div class="p-16 pb-3">
             <div class="ornament absolute -left-1/4 md:left-0 top-32 -z-10"><img
                     src="{{ asset('images/ornament_landing_1.svg') }}" alt=""></div>
-            <h1 data-aos="fade-up" class="text-center text-3xl md:text-4xl max-w-[650px]"><span class="font-semibold">Satu
-                    Portal </span>untuk Semua Kebutuhan Aplikasi
-                <span class="text-orange-600 font-semibold"></span>
+            <h1 data-aos="fade-up" class="text-center text-3xl md:text-4xl max-w-[650px]">Bring <span class="font-semibold">
+                    Project Based Learning  </span>to the
+                <span class="text-accent-600 font-semibold">#NextLevel</span>
             </h1>
         </div>
         <div class="p-10">
